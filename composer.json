@@ -1,0 +1,47 @@
+{
+    "name": "spacecatninja/imager-x-video-adapter",
+    "description": "Imager X file adapter for extracting and transforming images from videofiles using ffmpeg",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "imager",
+        "video"
+    ],
+    "support": {
+        "docs": "https://github.com/spacecatninja/craft-imager-x-video-adapter/blob/master/README.md",
+        "issues": "https://github.com/spacecatninja/craft-imager-x-video-adapter/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "SPACECATNINJA",
+            "homepage": "https://www.spacecat.ninja"
+        }
+    ],
+    "require": {
+        "php": "^8.0.2",
+        "ext-imagick": "*",
+        "craftcms/cms": "^4.0.0",
+        "spacecatninja/imager-x": "^4.1.0",
+        "php-ffmpeg/php-ffmpeg": "^1.0.0"
+    },
+    "autoload": {
+        "psr-4": {
+          "spacecatninja\\imagerxvideoadapter\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Imager X Video Adapter",
+        "handle": "imager-x-video-adapter",
+        "schemaVersion": "1.0.0",
+        "hasCpSettings": false,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/spacecatninja/craft-imager-x-video-adapter/master/CHANGELOG.md",
+        "components": {},
+        "class": "spacecatninja\\imagerxvideoadapter\\VideoAdapter"
+    }
+}
