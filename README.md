@@ -6,7 +6,7 @@ Also, an example of [how to make a custom file adapter for Imager X](https://ima
 
 ## Requirements
 
-This plugin requires Imager X 4.1.0+, Craft CMS 4.0.0+, PHP 8.0+ and [a working ffmpeg installation](https://ffmpeg.org/download.html). 
+This plugin requires Imager X 4.1+/5.0+, Craft CMS 4.0+/5.0+, PHP 8.0+ and [a working ffmpeg installation](https://ffmpeg.org/download.html). 
 
 ## Installation
 
