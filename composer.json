@@ -2,7 +2,7 @@
     "name": "spacecatninja/imager-x-video-adapter",
     "description": "Imager X file adapter for extracting and transforming images from videofiles using ffmpeg",
     "type": "craft-plugin",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "keywords": [
         "craft",
         "cms",
