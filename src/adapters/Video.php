@@ -13,6 +13,7 @@ use craft\elements\Asset;
 use craft\helpers\FileHelper;
 
 use FFMpeg\Coordinate\TimeCode;
+use FFMpeg\Exception\ExceptionInterface as FFMpegException;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use spacecatninja\imagerx\adapters\ImagerAdapterInterface;
@@ -80,6 +81,7 @@ class Video implements ImagerAdapterInterface
     public function load(Asset|string $asset): void
     {
         $this->source = $asset;
+        $this->isReady = false;
 
         try {
             $this->sourceModel = new LocalSourceImageModel($asset);
@@ -115,8 +117,14 @@ class Video implements ImagerAdapterInterface
             return $duration;
         }
         
-        $ffprobe = FFProbe::create($settings->ffmpegConfig);
-        $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');      
+        try {
+            $ffprobe = FFProbe::create($settings->ffmpegConfig);
+            $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');
+        } catch (FFMpegException $ffmpegException) {
+            Craft::error('An error occured when trying to get the duration of video: '.$ffmpegException->getMessage(), __METHOD__);
+
+            return 0;
+        }
         
         Craft::$app->getCache()->set(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()), $duration);
 
@@ -126,6 +134,7 @@ class Video implements ImagerAdapterInterface
     public function setTime(int|float|string $time): void
     {
         $this->time = $time;
+        $this->isReady = false;
     }
 
     /*
@@ -136,6 +145,9 @@ class Video implements ImagerAdapterInterface
     {
         /* @var Settings $settings */
         $settings = VideoAdapter::getInstance()?->getSettings();
+
+        // Only once for the current source and time, since Imager calls both getTransformPath() and getPath()
+        $this->isReady = true;
 
         if ($this->sourceModel === null) {
             return;
