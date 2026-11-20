@@ -8,64 +8,40 @@
 
 namespace SpaceCatNinja\ImagerXVideoAdapter;
 
-use craft\base\Plugin;
-use craft\web\twig\variables\CraftVariable;
-
+use CraftCms\Cms\Plugin\Plugin;
+use CraftCms\Cms\Plugin\PluginSettings;
+use CraftCms\Cms\Twig\Variables\CraftVariable;
+use SpaceCatNinja\ImagerX\Adapters\Adapters;
 use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
-use SpaceCatNinja\ImagerXVideoAdapter\Settings;
-use SpaceCatNinja\ImagerXVideoAdapter\Services\VideoLoaderService;
 use SpaceCatNinja\ImagerXVideoAdapter\Twig\VideoAdapterVariable;
-
-use yii\base\Event;
 
 /**
  * @author    SpaceCatNinja
  * @package   ImagerXVideoAdapter
  * @since     1.0.0
- *
- * @property  VideoLoaderService $loader
- *
  */
 class VideoAdapter extends Plugin
 {
-    public function init(): void
+    public function register(): void
     {
-        parent::init();
+        parent::register();
 
-        // Register services
-        $this->setComponents([
-            'loader' => VideoLoaderService::class,
-        ]);
-
-        // Register our variables
-        Event::on(CraftVariable::class, CraftVariable::EVENT_INIT,
-            static function(Event $event) {
-                /** @var CraftVariable $variable */
-                $variable = $event->sender;
-                $variable->set('videoadapter', VideoAdapterVariable::class);
-            }
-        );
-        
-        // Register adapter in Imager X
-        Event::on(\spacecatninja\imagerx\ImagerX::class,
-            \spacecatninja\imagerx\ImagerX::EVENT_REGISTER_ADAPTERS,
-            function (\spacecatninja\imagerx\events\RegisterAdaptersEvent $event) {
-                /* @var Settings $settings */
-                $settings = $this->getSettings();
-                
-                foreach ($settings->addFileFormats as $format) {
-                    $event->adapters[$format] = Video::class;
-                }
-            }
-        );
+        $this->app->singleton(Settings::class, fn() => $this->getSettings());
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function createSettingsModel(): ?Settings
+    public function boot(Adapters $adapters, Settings $settings): void
+    {
+        // Register adapter in Imager X, for each file format
+        foreach ($settings->addFileFormats as $format) {
+            $adapters->register($format, Video::class);
+        }
+
+        // Register our variable, craft.videoadapter
+        CraftVariable::macro('videoadapter', static fn() => app(VideoAdapterVariable::class));
+    }
+
+    protected static function createSettings(): ?PluginSettings
     {
         return new Settings();
     }
-
 }

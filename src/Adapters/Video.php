@@ -8,19 +8,20 @@
 
 namespace SpaceCatNinja\ImagerXVideoAdapter\Adapters;
 
-use Craft;
-use craft\elements\Asset;
-use craft\helpers\FileHelper;
-
+use CraftCms\Cms\Asset\Elements\Asset;
+use CraftCms\Cms\Cms;
+use CraftCms\Cms\Support\Config;
+use CraftCms\Cms\Support\Facades\Path;
+use CraftCms\Cms\Support\File;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
-use spacecatninja\imagerx\adapters\ImagerAdapterInterface;
-use spacecatninja\imagerx\exceptions\ImagerException;
-use spacecatninja\imagerx\models\LocalSourceImageModel;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use SpaceCatNinja\ImagerX\Adapters\ImagerAdapterInterface;
+use SpaceCatNinja\ImagerX\Data\LocalSourceImageModel;
+use SpaceCatNinja\ImagerX\Exceptions\ImagerException;
 use SpaceCatNinja\ImagerXVideoAdapter\Settings;
-use SpaceCatNinja\ImagerXVideoAdapter\VideoAdapter;
-use yii\base\Exception;
 
 class Video implements ImagerAdapterInterface
 {
@@ -28,7 +29,7 @@ class Video implements ImagerAdapterInterface
 
     public Asset|string|null $source = null;
     public LocalSourceImageModel|null $sourceModel = null;
-    
+
     public int|float|string $time = '25%';
     public string $format = 'png';
 
@@ -38,13 +39,10 @@ class Video implements ImagerAdapterInterface
 
     public function __construct(Asset|string|null $asset, array $opts = [])
     {
-        /* @var Settings $settings */
-        $settings = VideoAdapter::getInstance()?->getSettings();
+        $settings = app(Settings::class);
 
-        if ($settings) {
-            $this->format = $opts['format'] ?? $settings->defaultFormat;
-            $this->time = $opts['time'] ?? $settings->defaultTime;
-        }
+        $this->format = $opts['format'] ?? $settings->defaultFormat;
+        $this->time = $opts['time'] ?? $settings->defaultTime;
 
         if ($asset) {
             $this->load($asset);
@@ -84,7 +82,7 @@ class Video implements ImagerAdapterInterface
         try {
             $this->sourceModel = new LocalSourceImageModel($asset);
         } catch (ImagerException $imagerException) {
-            Craft::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage(), __METHOD__);
+            Log::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage());
             $this->sourceModel = null;
         }
     }
@@ -92,9 +90,8 @@ class Video implements ImagerAdapterInterface
 
     public function getDuration(): int|float
     {
-        /* @var Settings $settings */
-        $settings = VideoAdapter::getInstance()?->getSettings();
-        
+        $settings = app(Settings::class);
+
         if ($this->sourceModel === null) {
             return 0;
         }
@@ -102,23 +99,23 @@ class Video implements ImagerAdapterInterface
         try {
             $this->sourceModel->getLocalCopy();
         } catch (ImagerException $imagerException) {
-            Craft::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage(), __METHOD__);
+            Log::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage());
 
             return 0;
         }
 
         $sourceModel = $this->sourceModel;
-        
-        $duration = Craft::$app->getCache()->get(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()));
-        
+
+        $duration = Cache::get(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()));
+
         if ($duration) {
             return $duration;
         }
-        
+
         $ffprobe = FFProbe::create($settings->ffmpegConfig);
-        $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');      
-        
-        Craft::$app->getCache()->set(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()), $duration);
+        $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');
+
+        Cache::put(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()), $duration, Config::durationInSeconds(Cms::config()->cacheDuration) ?: null);
 
         return $duration;
     }
@@ -134,8 +131,7 @@ class Video implements ImagerAdapterInterface
 
     protected function getVideoThumbnail(): void
     {
-        /* @var Settings $settings */
-        $settings = VideoAdapter::getInstance()?->getSettings();
+        $settings = app(Settings::class);
 
         if ($this->sourceModel === null) {
             return;
@@ -144,33 +140,28 @@ class Video implements ImagerAdapterInterface
         try {
             $this->sourceModel->getLocalCopy();
         } catch (ImagerException $imagerException) {
-            Craft::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage(), __METHOD__);
-            return;
-        }
-        
-        $this->transformPath = $this->sourceModel->transformPath;
-        
-        try {
-            $cachePath = Craft::$app->getPath()->getRuntimePath().DIRECTORY_SEPARATOR.'imager'.DIRECTORY_SEPARATOR.'video-adapter'.$this->sourceModel->transformPath.'/';
-        } catch (Exception $exception) {
-            Craft::error('An error occured when trying to set cache path in Video Adapter: '.$exception->getMessage(), __METHOD__);
+            Log::error('An error occured when trying to open file with Video Adapter: '.$imagerException->getMessage());
             return;
         }
 
-        if (!realpath($cachePath)) {
+        $this->transformPath = $this->sourceModel->transformPath;
+
+        $cachePath = Path::runtime().DIRECTORY_SEPARATOR.'imager'.DIRECTORY_SEPARATOR.'video-adapter'.$this->sourceModel->transformPath.'/';
+
+        if (!is_dir($cachePath)) {
             try {
-                FileHelper::createDirectory($cachePath);
-            } catch (\Exception) {
+                File::ensureDirectoryExists($cachePath);
+            } catch (\Throwable) {
                 // just ignore
             }
 
-            if (!realpath($cachePath)) {
-                Craft::error('Could not create path: '.$cachePath, __METHOD__);
+            if (!is_dir($cachePath)) {
+                Log::error('Could not create path: '.$cachePath);
 
                 return;
             }
         }
-        
+
         $this->path = $cachePath.$this->getTempFilename($this->sourceModel->basename);
 
         if (!$this->shouldCreateTempFile($this->path)) {
@@ -190,12 +181,11 @@ class Video implements ImagerAdapterInterface
 
     protected function shouldCreateTempFile(string $path): bool
     {
-        /* @var Settings $settings */
-        $settings = VideoAdapter::getInstance()?->getSettings();
+        $settings = app(Settings::class);
 
         return !$settings->cacheEnabled ||
             !file_exists($path) ||
-            (($settings->cacheDuration !== false) && (FileHelper::lastModifiedTime($path) + $settings->cacheDuration < time()));
+            (($settings->cacheDuration !== false) && (File::lastModified($path) + $settings->cacheDuration < time()));
     }
 
     protected function convertTime(int|float|string $time): int|float
@@ -203,7 +193,7 @@ class Video implements ImagerAdapterInterface
         if (!is_string($time)) {
             return $time;
         }
-        
+
         $duration = $this->getDuration();
         $percent = ((int)str_replace('%', '', $time))/100;
 

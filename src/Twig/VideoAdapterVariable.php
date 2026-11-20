@@ -8,22 +8,21 @@
 
 namespace SpaceCatNinja\ImagerXVideoAdapter\Twig;
 
-use craft\elements\Asset;
+use CraftCms\Cms\Asset\Elements\Asset;
 use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
-use SpaceCatNinja\ImagerXVideoAdapter\VideoAdapter;
+use SpaceCatNinja\ImagerXVideoAdapter\Services\VideoLoaderService;
 
 /**
- * VideoAdapterVariable Variable
+ * The `craft.videoadapter` variable.
  *
  * @author    SpaceCatNinja
  * @package   ImagerXVideoAdapter
  * @since     1.0.0
  */
-
 class VideoAdapterVariable
 {
     public function load(Asset|string $asset, array $opts = []): ?Video
     {
-        return VideoAdapter::getInstance()->loader->loadVideo($asset, $opts);
+        return app(VideoLoaderService::class)->loadVideo($asset, $opts);
     }
 }

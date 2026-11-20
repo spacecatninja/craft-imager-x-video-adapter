@@ -8,11 +8,8 @@
 
 namespace SpaceCatNinja\ImagerXVideoAdapter\Services;
 
-use craft\base\Component;
-use craft\elements\Asset;
-
+use CraftCms\Cms\Asset\Elements\Asset;
 use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
-
 
 /**
  * VideoLoaderService
@@ -21,7 +18,7 @@ use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
  * @package   ImagerXVideoAdapter
  * @since     1.0.0
  */
-class VideoLoaderService extends Component
+class VideoLoaderService
 {
     public function loadVideo(Asset|string $asset, array $opts = []): ?Video
     {

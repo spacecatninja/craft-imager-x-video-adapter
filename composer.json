@@ -23,11 +23,11 @@
         }
     ],
     "require": {
-        "php": "^8.0.2",
+        "php": "^8.5",
         "ext-imagick": "*",
-        "craftcms/cms": "^4.0.0|^5.0.0-beta.1",
-        "spacecatninja/imager-x": "^4.1.0|^5.0.0-beta.1|^6.0.0-beta",
-        "php-ffmpeg/php-ffmpeg": "^1.0.0"
+        "craftcms/cms": "^6.0.0-alpha",
+        "spacecatninja/imager-x": "^7.0.0-beta.2",
+        "php-ffmpeg/php-ffmpeg": "^1.4.0"
     },
     "autoload": {
         "psr-4": {
@@ -39,9 +39,7 @@
         "handle": "imager-x-video-adapter",
         "schemaVersion": "1.0.0",
         "hasCpSettings": false,
-        "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/spacecatninja/craft-imager-x-video-adapter/master/CHANGELOG.md",
-        "components": {},
         "class": "SpaceCatNinja\\ImagerXVideoAdapter\\VideoAdapter"
     }
 }
