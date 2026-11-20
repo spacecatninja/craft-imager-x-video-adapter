@@ -6,11 +6,11 @@
  * @copyright Copyright (c) 2022 André Elvan
  */
 
-namespace spacecatninja\imagerxvideoadapter\variables;
+namespace SpaceCatNinja\ImagerXVideoAdapter\Twig;
 
 use craft\elements\Asset;
-use spacecatninja\imagerxvideoadapter\adapters\Video;
-use spacecatninja\imagerxvideoadapter\VideoAdapter;
+use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
+use SpaceCatNinja\ImagerXVideoAdapter\VideoAdapter;
 
 /**
  * VideoAdapterVariable Variable

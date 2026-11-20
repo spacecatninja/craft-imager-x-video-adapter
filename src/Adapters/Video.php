@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2022 André Elvan
  */
 
-namespace spacecatninja\imagerxvideoadapter\adapters;
+namespace SpaceCatNinja\ImagerXVideoAdapter\Adapters;
 
 use Craft;
 use craft\elements\Asset;
@@ -18,8 +18,8 @@ use FFMpeg\FFProbe;
 use spacecatninja\imagerx\adapters\ImagerAdapterInterface;
 use spacecatninja\imagerx\exceptions\ImagerException;
 use spacecatninja\imagerx\models\LocalSourceImageModel;
-use spacecatninja\imagerxvideoadapter\models\Settings;
-use spacecatninja\imagerxvideoadapter\VideoAdapter;
+use SpaceCatNinja\ImagerXVideoAdapter\Settings;
+use SpaceCatNinja\ImagerXVideoAdapter\VideoAdapter;
 use yii\base\Exception;
 
 class Video implements ImagerAdapterInterface

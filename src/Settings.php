@@ -6,7 +6,7 @@
  * @copyright Copyright (c) 2022 André Elvan
   */
 
-namespace spacecatninja\imagerxvideoadapter\models;
+namespace SpaceCatNinja\ImagerXVideoAdapter;
 
 use craft\base\Model;
 

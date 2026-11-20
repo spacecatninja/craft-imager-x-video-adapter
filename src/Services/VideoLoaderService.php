@@ -6,12 +6,12 @@
  * @copyright Copyright (c) 2022 André Elvan
  */
 
-namespace spacecatninja\imagerxvideoadapter\services;
+namespace SpaceCatNinja\ImagerXVideoAdapter\Services;
 
 use craft\base\Component;
 use craft\elements\Asset;
 
-use spacecatninja\imagerxvideoadapter\adapters\Video;
+use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
 
 
 /**

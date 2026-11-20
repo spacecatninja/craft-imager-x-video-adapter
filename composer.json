@@ -31,7 +31,7 @@
     },
     "autoload": {
         "psr-4": {
-          "spacecatninja\\imagerxvideoadapter\\": "src/"
+            "SpaceCatNinja\\ImagerXVideoAdapter\\": "src/"
         }
     },
     "extra": {
@@ -42,6 +42,6 @@
         "hasCpSection": false,
         "changelogUrl": "https://raw.githubusercontent.com/spacecatninja/craft-imager-x-video-adapter/master/CHANGELOG.md",
         "components": {},
-        "class": "spacecatninja\\imagerxvideoadapter\\VideoAdapter"
+        "class": "SpaceCatNinja\\ImagerXVideoAdapter\\VideoAdapter"
     }
 }

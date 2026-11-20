@@ -6,15 +6,15 @@
  * @copyright Copyright (c) 2022 André Elvan
  */
 
-namespace spacecatninja\imagerxvideoadapter;
+namespace SpaceCatNinja\ImagerXVideoAdapter;
 
 use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
 
-use spacecatninja\imagerxvideoadapter\adapters\Video;
-use spacecatninja\imagerxvideoadapter\models\Settings;
-use spacecatninja\imagerxvideoadapter\services\VideoLoaderService;
-use spacecatninja\imagerxvideoadapter\variables\VideoAdapterVariable;
+use SpaceCatNinja\ImagerXVideoAdapter\Adapters\Video;
+use SpaceCatNinja\ImagerXVideoAdapter\Settings;
+use SpaceCatNinja\ImagerXVideoAdapter\Services\VideoLoaderService;
+use SpaceCatNinja\ImagerXVideoAdapter\Twig\VideoAdapterVariable;
 
 use yii\base\Event;
 
