@@ -1,6 +1,6 @@
 # Imager X Video Adapter Changelog
 
-## 1.1.2 - Unreleased
+## 1.1.2 - 2026-11-20
 
 ### Fixed
 - Fixed the video frame being extracted again on every call to `getPath()` and `getTransformPath()`. Imager X calls both for each transform, so with `cacheEnabled` off, each frame was extracted twice.
