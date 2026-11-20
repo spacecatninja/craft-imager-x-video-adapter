@@ -6,14 +6,17 @@ Also, an example of [how to make a custom file adapter for Imager X](https://ima
 
 ## Requirements
 
-This plugin requires Imager X 4.1+/5.0+, Craft CMS 4.0+/5.0+, PHP 8.0+ and [a working ffmpeg installation](https://ffmpeg.org/download.html). 
+This plugin requires Craft CMS 6.0.0 or later, [Imager X 7.0.0](https://github.com/spacecatninja/craft-imager-x/) or later,
+PHP 8.5 or later, and [a working ffmpeg installation](https://ffmpeg.org/download.html), with both `ffmpeg` and `ffprobe`.
+
+Version 1.x of this plugin supports Craft CMS 4 and 5 and Imager X 4, 5 and 6. See [UPGRADE.md](UPGRADE.md) when moving to Craft 6.
 
 ## Installation
 
 To install the plugin, follow these instructions:
 
 1. Install with composer via `composer require spacecatninja/imager-x-video-adapter` from your project directory.
-2. Install the plugin in the Craft Control Panel under Settings → Plugins, or from the command line via `./craft install/plugin imager-x-video-adapter`.
+2. Install the plugin in the Craft Control Panel under Settings > Plugins, or from the command line via `php artisan craft:plugin:install imager-x-video-adapter`.
 
 ---
 
@@ -67,8 +70,22 @@ list of safe file formats to transform, using the config setting ['safeFileForma
 
 ## Configuring
 
-You can configure the adapter by creating a file in your config folder called
-`imager-x-video-adapter.php`, and override settings as needed.
+You can configure the adapter by creating a file called `imager-x-video-adapter.php` in your `config/craft/` folder,
+and override settings as needed. It's a plain Laravel config file, so use `env()` for environment-specific values.
+Example:
+
+```php
+<?php
+
+return [
+    'defaultTime' => '10%',
+    'addFileFormats' => ['mp4', 'mov', 'avi', 'webm'],
+    'ffmpegConfig' => [
+        'ffmpeg.binaries' => env('FFMPEG_BINARY', '/usr/bin/ffmpeg'),
+        'ffprobe.binaries' => env('FFPROBE_BINARY', '/usr/bin/ffprobe'),
+    ],
+];
+```
 
 ### ffmpegConfig [array]
 Default: `[]`  
