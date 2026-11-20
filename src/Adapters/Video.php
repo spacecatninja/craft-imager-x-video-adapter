@@ -14,6 +14,7 @@ use CraftCms\Cms\Support\Config;
 use CraftCms\Cms\Support\Facades\Path;
 use CraftCms\Cms\Support\File;
 use FFMpeg\Coordinate\TimeCode;
+use FFMpeg\Exception\ExceptionInterface as FFMpegException;
 use FFMpeg\FFMpeg;
 use FFMpeg\FFProbe;
 use Illuminate\Support\Facades\Cache;
@@ -78,6 +79,7 @@ class Video implements ImagerAdapterInterface
     public function load(Asset|string $asset): void
     {
         $this->source = $asset;
+        $this->isReady = false;
 
         try {
             $this->sourceModel = new LocalSourceImageModel($asset);
@@ -112,8 +114,14 @@ class Video implements ImagerAdapterInterface
             return $duration;
         }
 
-        $ffprobe = FFProbe::create($settings->ffmpegConfig);
-        $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');
+        try {
+            $ffprobe = FFProbe::create($settings->ffmpegConfig);
+            $duration = $ffprobe->format($sourceModel->getFilePath())->get('duration');
+        } catch (FFMpegException $ffmpegException) {
+            Log::error('An error occured when trying to get the duration of video: '.$ffmpegException->getMessage());
+
+            return 0;
+        }
 
         Cache::put(self::DURATION_CACHE_KEY.'_'.base64_encode($this->sourceModel->getFilePath()), $duration, Config::durationInSeconds(Cms::config()->cacheDuration) ?: null);
 
@@ -123,6 +131,7 @@ class Video implements ImagerAdapterInterface
     public function setTime(int|float|string $time): void
     {
         $this->time = $time;
+        $this->isReady = false;
     }
 
     /*
@@ -132,6 +141,9 @@ class Video implements ImagerAdapterInterface
     protected function getVideoThumbnail(): void
     {
         $settings = app(Settings::class);
+
+        // Only once for the current source and time, since Imager calls both getTransformPath() and getPath()
+        $this->isReady = true;
 
         if ($this->sourceModel === null) {
             return;
